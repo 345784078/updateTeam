@@ -78,7 +78,7 @@ async function writeFile() {
   console.log(`文件写入成功，已经替换`);
   console.log(`等待6秒后刷新CDN缓存`);
   await $.wait(6000);
-  await $.http.get({url: `https://purge.jsdelivr.net/gh/lxk0301/updateTeam@master/jd_updateFactoryTuanId.json`}).then((resp) => {
+  await $.http.get({url: `https://purge.jsdelivr.net/gh/345784078/updateTeam@master/jd_updateFactoryTuanId.json`}).then((resp) => {
     if (resp.statusCode === 200) {
       console.log(`已刷新CDN缓存`)
     } else {
