@@ -53,8 +53,8 @@ jobs:
         uses: Yikun/hub-mirror-action@master
         if: env.dst_key
         with:
-          src: github/lxk0301
-          dst: gitee/lxk0301
+          src: github/345784078
+          dst: gitee/twogenchen
           static_list: "updateTeam"
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITEE_TOKEN }}
