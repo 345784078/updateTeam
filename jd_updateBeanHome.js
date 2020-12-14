@@ -78,7 +78,7 @@ function showMsg() {
 }
 
 async function writeFile() {
-  await fs.writeFileSync('test.json', JSON.stringify($.codeInfo));
+  await fs.writeFileSync('jd_updateBeanHome.json', JSON.stringify($.codeInfo));
   console.log(`文件写入成功,inviteCode已经替换`);
 }
 
