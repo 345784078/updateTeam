@@ -43,9 +43,9 @@ jobs:
       - name: commit
         run: |
           git config --global user.email ${{ secrets.EMAIL }}
-          git config --global user.name lxk0301
+          git config --global user.name twogen
           git add .
-          git commit -m "update by lxk0301 Github Action" -a || echo "Nothing to update"
+          git commit -m "update by twogen Github Action" -a || echo "Nothing to update"
       
       - name: Push changes
         uses: ad-m/github-push-action@master
@@ -59,8 +59,8 @@ jobs:
         uses: Yikun/hub-mirror-action@master
         if: env.dst_key
         with:
-          src: github/lxk0301
-          dst: gitee/lxk0301
+          src: github/345784078
+          dst: gitee/twogenchen
           static_list: "updateTeam"
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITEE_TOKEN }}
