@@ -67,9 +67,9 @@ async function getCookie() {
 }
 if (typeof $request !== 'undefined') {
   getCookie().then(r => {
-    $.done()
+   #$.done()
   }).finally(() => {
-    $.done()
+    #$.done()
   })
 } else {
   !(async () => {
