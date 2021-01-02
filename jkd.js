@@ -31,7 +31,15 @@ const API_HOST = 'https://www.xiaodouzhuan.cn'
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
 const $ = new Env("聚看点")
 let sum = 0
-let cookiesArr = ['JSESSIONID=71BE0600AC2013C4BD6F9F4D0ADF0F1F; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609491518|1609491425; CNZZDATA1275904587=397175991-1609487061-%7C1609487061; CNZZDATA1274871401=1683795855-1609335316-https%253A%252F%252Fwww.xiaodouzhuan.cn%252F%7C1609487301; CNZZDATA1275507390=341001722-1609335900-%7C1609490569; UM_distinctid=176b42280484e0-07052d192345278-754c1451-4a574-176b4228049e7f;@JSESSIONID=72170616D2DB9D0227F45F38AE74D658; UM_distinctid=176bc2af7be798-0496109a238fab-754c1551-4a574-176bc2af7bf1a40; CNZZDATA1275507390=2092539526-1609470365-%7C1609470365; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609474701|1609474700; xz_jkd_appkey=127167603ecf4acd9bc0e4544d8fd6ba!iOS!5.6.5;&JSESSIONID=9E501C018790940D80131332A37AA46F; UM_distinctid=176bc362eeaa89-0eee87b307e122-754c1451-2c600-176bc362eebb57; CNZZDATA1274871401=9078072-1609470961-https%253A%252F%252Fwww.xiaodouzhuan.cn%252F%7C1609470961; CNZZDATA1275507390=958191345-1609470365-%7C1609470365; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609475436|1609475435; xz_jkd_appkey=8d8ad2c4664240be9111f4977e56c83c!iOS!5.6.5;&JSESSIONID=C4CA5789C89091F6EE2795E1B8582A2F; SERVERID=4b3bae870580896bded23ba1131db97c|1609475617|1609475617; xz_jkd_appkey=12b5478619204318b02e742369d7b7c2!iOS!5.6.5;'], cookie = '', message;
+let cookiesArr = [
+'JSESSIONID=71BE0600AC2013C4BD6F9F4D0ADF0F1F; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609491518|1609491425; CNZZDATA1275904587=397175991-1609487061-%7C1609487061; CNZZDATA1274871401=1683795855-1609335316-https%253A%252F%252Fwww.xiaodouzhuan.cn%252F%7C1609487301; CNZZDATA1275507390=341001722-1609335900-%7C1609490569; UM_distinctid=176b42280484e0-07052d192345278-754c1451-4a574-176b4228049e7f',
+'JSESSIONID=72170616D2DB9D0227F45F38AE74D658; UM_distinctid=176bc2af7be798-0496109a238fab-754c1551-4a574-176bc2af7bf1a40; CNZZDATA1275507390=2092539526-1609470365-%7C1609470365; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609474701|1609474700; xz_jkd_appkey=127167603ecf4acd9bc0e4544d8fd6ba!iOS!5.6.5',
+'JSESSIONID=9E501C018790940D80131332A37AA46F; UM_distinctid=176bc362eeaa89-0eee87b307e122-754c1451-2c600-176bc362eebb57; CNZZDATA1274871401=9078072-1609470961-https%253A%252F%252Fwww.xiaodouzhuan.cn%252F%7C1609470961; CNZZDATA1275507390=958191345-1609470365-%7C1609470365; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609475436|1609475435; xz_jkd_appkey=8d8ad2c4664240be9111f4977e56c83c!iOS!5.6.5',
+'JSESSIONID=C4CA5789C89091F6EE2795E1B8582A2F; SERVERID=4b3bae870580896bded23ba1131db97c|1609475617|1609475617; xz_jkd_appkey=12b5478619204318b02e742369d7b7c2!iOS!5.6.5',
+
+  // '', // xz_jkd_appkey=xxx; JSESSIONID=xxx; UM_distinctid=xxx; （账号1ck）
+  // '', // xz_jkd_appkey=xxx; JSESSIONID=xxx; UM_distinctid=xxx; （账号2ck）
+], cookie = '', message;
 
 async function getCookie() {
   if ($request && $request.method !== `OPTIONS`) {
@@ -99,6 +107,7 @@ if (typeof $request !== 'undefined') {
       };
     } else {
       let cookiesData = $.getdata('CookiesJKD2') || "[]";
+      sum = $.getdata("JKD_WITHDRAW") || 0;
       cookiesData = jsonParse(cookiesData);
       cookiesArr = cookiesData;
       cookiesArr.reverse();
@@ -111,7 +120,7 @@ if (typeof $request !== 'undefined') {
     for (let i = 0; i < cookiesArr.length; i++) {
       if (cookiesArr[i]) {
         cookie = cookiesArr[i];
-        if(cookie.indexOf("UM_distinctid")>0){
+        if(cookie.match(/UM_distinctid=(\S*);/)){
           $.uuid = cookie.match(/UM_distinctid=(\S*);/)[1]
         }
         else $.uuid = ""
@@ -456,7 +465,7 @@ function sign() {
             data = JSON.parse(data);
             if (data['ret'] === 'ok') {
               $.profit += data.datas.signAmt
-              $.log(`签到成功，获得 ${data.datas.signAmt}金币，已签到${data.datas.signDays}，下次签到金币：${data.datas.nextSignAmt}`)
+              $.log(`签到成功，获得 ${data.datas.signAmt} 金币，已签到 ${data.datas.signDays}天，下次签到金币：${data.datas.nextSignAmt}`)
               $.log(`去做签到分享任务`)
               await signShare(data.datas.position)
             } else {
@@ -577,7 +586,7 @@ function adv(position) {
           if (safeGet(data)) {
             data = JSON.parse(data);
             if (data['ret'] === 'ok') {
-              $.log(`点击视频成功，预计获得${data.rewardAmount ? data.rewardAmount : 0}金币，等待30秒`)
+              $.log(`点击视频成功，预计获得 ${data.rewardAmount ? data.rewardAmount : 0} 金币，等待 30 秒`)
               await $.wait(31 * 1000)
               body['time'] = `${new Date().getTime()}`
               await rewardAdv(body)
