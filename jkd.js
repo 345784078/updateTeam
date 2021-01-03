@@ -28,17 +28,18 @@ cron "0,30 * * * *" script-path=https://raw.githubusercontent.com/shylocks/Loon/
 hostname = www.xiaodouzhuan.cn
 */
 const API_HOST = 'https://www.xiaodouzhuan.cn'
-const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+let UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+const DATE = `${new Date().getUTCFullYear()}${(new Date().getUTCMonth()+1).toString().padStart(2,"0")}${new Date().getUTCDate().toString().padStart(2,"0")}`
+let liveBody = null
 const $ = new Env("聚看点")
 let sum = 0
 let cookiesArr = [
-"JSESSIONID=4410BF27C0B14B5A6879C19E36B46250; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609492351|1609492350; xz_jkd_appkey=4182ca70d4f04fc59b74ad07f8c62ab5!iOS!5.6.5",
-"JSESSIONID=72170616D2DB9D0227F45F38AE74D658; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609474701|1609474700; xz_jkd_appkey=127167603ecf4acd9bc0e4544d8fd6ba!iOS!5.6.5",
-"JSESSIONID=9E501C018790940D80131332A37AA46F; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609475436|1609475435; xz_jkd_appkey=8d8ad2c4664240be9111f4977e56c83c!iOS!5.6.5",
-"JSESSIONID=C4CA5789C89091F6EE2795E1B8582A2F; SERVERID=4b3bae870580896bded23ba1131db97c|1609475617|1609475617; xz_jkd_appkey=12b5478619204318b02e742369d7b7c2!iOS!5.6.5", 
-//"JSESSIONID=72170616D2DB9D0227F45F38AE74D658; UM_distinctid=176bc2af7be798-0496109a238fab-754c1551-4a574-176bc2af7bf1a40; CNZZDATA1275507390=2092539526-1609470365-%7C1609470365; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609474701|1609474700; xz_jkd_appkey=127167603ecf4acd9bc0e4544d8fd6ba!iOS!5.6.5",
-//"JSESSIONID=9E501C018790940D80131332A37AA46F; UM_distinctid=176bc362eeaa89-0eee87b307e122-754c1451-2c600-176bc362eebb57; CNZZDATA1274871401=9078072-1609470961-https%253A%252F%252Fwww.xiaodouzhuan.cn%252F%7C1609470961; CNZZDATA1275507390=958191345-1609470365-%7C1609470365; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609475436|1609475435; xz_jkd_appkey=8d8ad2c4664240be9111f4977e56c83c!iOS!5.6.5",
-//"JSESSIONID=C4CA5789C89091F6EE2795E1B8582A2F; SERVERID=4b3bae870580896bded23ba1131db97c|1609475617|1609475617; xz_jkd_appkey=12b5478619204318b02e742369d7b7c2!iOS!5.6.5",
+  "JSESSIONID=4410BF27C0B14B5A6879C19E36B46250; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609492351|1609492350; xz_jkd_appkey=4182ca70d4f04fc59b74ad07f8c62ab5!iOS!5.6.5",
+"JSESSIONID=72170616D2DB9D0227F45F38AE74D658; UM_distinctid=176bc2af7be798-0496109a238fab-754c1551-4a574-176bc2af7bf1a40; CNZZDATA1275507390=2092539526-1609470365-%7C1609470365; SERVERID=18d4c625632a6d18d7fffb33bff74b74|1609474701|1609474700; xz_jkd_appkey=127167603ecf4acd9bc0e4544d8fd6ba!iOS!5.6.5",
+"JSESSIONID=9E501C018790940D80131332A37AA46F; UM_distinctid=176bc362eeaa89-0eee87b307e122-754c1451-2c600-176bc362eebb57; CNZZDATA1274871401=9078072-1609470961-https%253A%252F%252Fwww.xiaodouzhuan.cn%252F%7C1609470961; CNZZDATA1275507390=958191345-1609470365-%7C1609470365; SERVERID=e2e52ee42199401ef190e9b9166db76a|1609475436|1609475435; xz_jkd_appkey=8d8ad2c4664240be9111f4977e56c83c!iOS!5.6.5",
+"JSESSIONID=C4CA5789C89091F6EE2795E1B8582A2F; SERVERID=4b3bae870580896bded23ba1131db97c|1609475617|1609475617; xz_jkd_appkey=12b5478619204318b02e742369d7b7c2!iOS!5.6.5",
+  // '', // xz_jkd_appkey=xxx; JSESSIONID=xxx; UM_distinctid=xxx; （账号1ck）
+  // '', // xz_jkd_appkey=xxx; JSESSIONID=xxx; UM_distinctid=xxx; （账号2ck）
 ], cookie = '', message;
 
 async function getCookie() {
@@ -63,9 +64,9 @@ async function getCookie() {
         $.setdata(JSON.stringify(cks), "CookiesJKD2")
         $.msg($.name, `获取Cookie ${$.openId} 成功`)
       } else {
-        if(!$.openId){
+        if (!$.openId) {
           $.msg($.name, `无法获取openId，请检查是否绑定微信`)
-        }else{
+        } else {
           $.msg($.name, `openId ${$.openId} 已存在`)
         }
         // $.msg($.name, `${$.userName}已存在，请注释脚本`)
@@ -73,6 +74,7 @@ async function getCookie() {
     }
   }
 }
+
 if (typeof $request !== 'undefined') {
   getCookie().then(r => {
     $.done()
@@ -95,7 +97,7 @@ if (typeof $request !== 'undefined') {
       } else if (process.env.JKD_COOKIE) {
         JKCookie = process.env.JKD_COOKIE.split()
       }
-      if (process.env.JKD_WITHDRAW){
+      if (process.env.JKD_WITHDRAW) {
         sum = process.env.JKD_WITHDRAW
       }
       Object.keys(JKCookie).forEach((item) => {
@@ -109,7 +111,7 @@ if (typeof $request !== 'undefined') {
       let cookiesData = $.getdata('CookiesJKD2') || "[]";
       sum = $.getdata("JKD_WITHDRAW") || 0;
       cookiesData = jsonParse(cookiesData);
-      cookiesArr = cookiesData;
+      cookiesArr = cookiesData.length>0?cookiesData:cookiesArr;
       cookiesArr.reverse();
       cookiesArr = cookiesArr.filter(item => item !== "" && item !== null && item !== undefined);
     }
@@ -117,38 +119,123 @@ if (typeof $request !== 'undefined') {
       $.msg($.name, '【提示】请先获取聚看点账号一cookie');
       return;
     }
+    await requireConfig()
     for (let i = 0; i < cookiesArr.length; i++) {
       if (cookiesArr[i]) {
         cookie = cookiesArr[i];
-        if(cookie.match(/UM_distinctid=(\S*);/)){
+        if (cookie.match(/UM_distinctid=(\S*);/)) {
           $.uuid = cookie.match(/UM_distinctid=(\S*);/)[1]
-        }
-        else $.uuid = ""
+        } else $.uuid = ""
         await getOpenId()
         $.index = i + 1;
+        $.message = ''
         if (!$.openId) {
           console.log(`Cookies${$.index}已失效！`)
           break
         }
+        if(liveBody[$.openId]){
+          if(!liveBody[$.openId][DATE]) {
+            liveBody[$.openId][DATE] = {
+              "livetime" : 0,
+              "articletime" : 0,
+              "videotime" : 0,
+            }
+            $.log('当日liveBody不存在，新建')
+            $.isSign = false
+          }else{
+            $.log('当日liveBody已存在')
+            $.isSign = true
+          }
+        } else{
+          liveBody[$.openId] = {}
+          liveBody[$.openId][DATE] = {
+            "livetime" : 0,
+            "articletime" : 0,
+            "videotime" : 0,
+          }
+          $.log('当日liveBody不存在，新建')
+          $.isSign = false
+        }
         await getUserInfo()
         console.log(`\n******开始【聚看点账号${$.index}】${$.userName || $.openId}*********\n`);
-        console.log(`${$.gold}，当前${$.current}，${$.sum}`)
-        if(cookie.indexOf('iOS')>0){
+        console.log(`${$.gold}，当前 ${$.current} 元，累计 ${$.sum} 元`)
+        $.iOS = true
+        if (cookie.indexOf('iOS') > 0) {
           console.log(`${$.userName}的cookie来自iOS客户端`)
-        } else if(cookie.indexOf('android')>0){
-          console.log(`${$.userName}的cookie来自安卓客户端，替换Cookie`)
-          cookie = cookie.replace('!android!753','!iOS!5.6.5')
+          UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+        } else if (cookie.indexOf('android') > 0) {
+          console.log(`${$.userName}的cookie来自安卓客户端`)
+          // $.iOS = false
+          UA = 'Dalvik/2.1.0 (Linux; U; Android 10; ONEPLUS A5010 Build/QKQ1.191014.012)'
+          // cookie = cookie.replace('!android!753', '!iOS!5.6.5')
+        } else{
+          console.log(`无法获取客户端标示，请检查cookie是否正确`)
         }
         await jkd()
+        await showMsg()
       }
     }
   })()
     .catch((e) => $.logErr(e))
-    .finally(() => $.done())
+    .finally(async () => {
+
+      if(!$.isNode()){
+        $.setdata(JSON.stringify(liveBody),"jkdLiveBody")
+      } else{
+        const fs = require('fs');
+        try {
+          await fs.writeFileSync('jkd.json', JSON.stringify(liveBody));
+        } catch(err) {
+          console.error(err)
+        }
+      }
+      $.done()
+    })
+}
+
+function requireConfig(){
+  if(!$.isNode()){
+    if($.getdata("jkdLiveBody")!=null) {
+      console.log('加载本地阅读时长body')
+      liveBody = JSON.parse($.getdata("jkdLiveBody"))
+      if(liveBody===null){
+        liveBody = {}
+      }
+    }
+    else {
+      console.log('没有阅读时长body，新建')
+      liveBody = {}
+    }
+  } else{
+    const fs = require('fs');
+    try {
+      if (!fs.existsSync('jkd.json')) {
+        $.log('未找到活跃时间body，新建')
+        liveBody = {}
+      } else{
+        $.log('读取本地活跃时间body')
+        let raw = fs.readFileSync('jkd.json').toString();
+        liveBody = JSON.parse(raw)?JSON.parse(raw):{}
+      }
+    } catch(err) {
+      liveBody = {}
+      console.error(err)
+    }
+  }
+}
+
+function showMsg(){
+  if(!$.isNode()) {
+    $.msg(`【账号${$.name}${$.index} ${$.userName}】`,`${$.gold}，当前 ${$.current} 元，累计 ${$.sum} 元`, $.message)
+  }else{
+    $.log(`【账号${$.name}${$.index} ${$.userName}】\n ${$.gold}，当前 ${$.current} 元，累计 ${$.sum} 元\n ${$.message}`)
+  }
 }
 
 async function jkd() {
-  if( sum!==0 && $.current > sum){
+  let st = new Date().getTime()
+  await call3($.uuid,"OPEN_APP")
+  if (sum !== 0 && $.current > sum) {
     console.log(`触发提现条件，去提现`)
     await withDraw()
   }
@@ -162,7 +249,7 @@ async function jkd() {
     $.log(`去转转盘`)
     for (let i = 0; i < 10 && $.luckyDrawNum > 0; ++i) {
       await getLuckyLevel()
-      if($.luckyDrawNum===0) break
+      if ($.luckyDrawNum === 0) break
       await luckyDraw()
       await luckyProfit()
       await $.wait(1000)
@@ -175,9 +262,10 @@ async function jkd() {
   }
   await openTimeBox()  // 宝箱
   await getTaskBoxProfit()  // 摇钱树1
-  await getTaskBoxProfit(2) // 摇钱树2
+  await getTaskBoxProfit(2) // 摇钱树2*/
   $.artList = []
   // 看视频
+  let stA = new Date().getTime()
   await getArticleList(53)
   for (let i = 0; i < $.artList.length; ++i) {
     const art = $.artList[i]
@@ -189,17 +277,20 @@ async function jkd() {
         $.log(`观看视屏次数已满，跳出`)
         break
       }
-      // await call1(artId)
+      await call1($.uuid,artId)
       await getVideo(artId, true)
-      // await video(artId)
-      // await call1(uuid)
+      await video(artId)
+      await call1($.uuid)
       await $.wait(31 * 1000)
       await videoAccount(artId)
       await $.wait(5 * 1000)
     }
   }
+  let etA = new Date().getTime()
+  let addArticleTime = Math.trunc((etA-stA)/1000)
   $.artList = []
   // 看文章
+  let stV = new Date().getTime()
   await getArticleList()
   for (let i = 0; i < $.artList.length; ++i) {
     const art = $.artList[i]
@@ -219,12 +310,74 @@ async function jkd() {
       await $.wait(5 * 1000)
     }
   }
+  let etV = new Date().getTime()
+  let addVideoTime = Math.trunc((etV-stV)/1000)
+
+  await $.wait(1000)
+  let et = new Date().getTime()
+  let addLiveTime = Math.trunc((et-st)/1000)
+  liveBody[$.openId][DATE]['livetime'] += addLiveTime
+  liveBody[$.openId][DATE]['articletime'] += addArticleTime
+  liveBody[$.openId][DATE]['videotime'] += addVideoTime
+  let body = {
+    'livetime': (liveBody[$.openId][DATE]['livetime']*1000).toString(),
+    'articletime' : (liveBody[$.openId][DATE]['articletime']*1000).toString(),
+    'videotime': (liveBody[$.openId][DATE]['videotime']*1000).toString(),
+    'addlivetime': (addLiveTime*1000).toString(),
+    'addarticletime': (addArticleTime*1000).toString(),
+    'addvideotime': (addVideoTime*1000).toString(),
+  }
+  $.message += `本次运行增加活跃时间 ${addLiveTime} 秒\n`
+  await userLive(body)
   $.log(`本次运行完成，共计获得 ${$.profit} 金币`)
+  $.message += `本次运行获得 ${$.profit} 金币\n`
+  await getUserInfo()
+}
+
+function userLive(body) {
+  // 保活
+  let postBody = {
+    ...body,
+    "appid": "xzwl",
+    "channel": $.iOS ? "iOS" : "android",
+    "psign": "92dea068b6c271161be05ed358b59932",
+    "appversioncode": $.version,
+    "time": new Date().getTime(),
+    "apptoken": "xzwltoken070704",
+    "appversion": $.version.toString().split('').join('.'),
+    "openid": "5575aa16cb974da4bd735f182fbffac5",
+    "os": $.iOS ? "iOS" : "android",
+    "opdate": `${DATE}`
+  }
+  return new Promise(resolve => {
+    $.post(taskPostUrl("jkd/user/userlive.action",
+      `jsondata=${escape(JSON.stringify(postBody))}`), async (err, resp, data) => {
+      try {
+        if (err) {
+          $.log(`${JSON.stringify(err)}`)
+          $.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (safeGet(data)) {
+            data = JSON.parse(data);
+            if (data['ret'] === 'ok') {
+              console.log('增加阅读时长成功！')
+            } else {
+              $.log(`获取任务列表失败，错误信息：${JSON.stringify(data)}`)
+            }
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+  })
 }
 
 function bindTeacher() {
   return new Promise(resolve => {
-    $.get(taskGetUrl("jkd/weixin20/member/bindTeacher.action","teacherCode=24224873"), async (err, resp, data) => {
+    $.get(taskGetUrl("jkd/weixin20/member/bindTeacher.action", "teacherCode=24224873"), async (err, resp, data) => {
       try {
         if (err) {
           $.log(`${JSON.stringify(err)}`)
@@ -240,6 +393,7 @@ function bindTeacher() {
     })
   })
 }
+
 function getStageState() {
   return new Promise(resolve => {
     $.post(taskGetUrl("jkd/weixin20/newactivity/readStageReward.action",), async (err, resp, data) => {
@@ -278,18 +432,18 @@ function getStageState() {
 function getTaskList() {
   let body = {
     "appid": "xzwl",
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
     "appversioncode": $.version,
     "time": new Date().getTime(),
     "apptoken": "xzwltoken070704",
-    "appversion": "5.6.5",
+    "appversion": $.version.toString().split('').join('.'),
     "openid": $.openId,
-    "os": "iOS",
+    "os": $.iOS ? "iOS" : "android",
     "listtype": "wealnews",
     "ua": $.isNode() ?
       (process.env.JKD_USER_AGENT ? process.env.JKD_USER_AGENT : UA) : ($.getdata('JKDUA')
-      ? $.getdata('JKDUA') : UA),
+        ? $.getdata('JKDUA') : UA),
     "pageNo": 0,
     "pageSize": 20
   }
@@ -334,14 +488,14 @@ function doTask(taskId, taskName, action) {
     //"exporturl": "https:\/\/kyshiman.com\/kkz\/channel?ref=436",
     //"pageurl": "https:\/\/new.huanzhuti.com\/news\/26382197?cid=qsbk02",
     "slidenum": 1,
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
     "appversioncode": `${$.version}`,
     "time": `${new Date().getTime()}`,
     "apptoken": "xzwltoken070704",
-    "appversion": "5.6.5",
+    "appversion": $.version.toString().split('').join('.'),
     "openid": $.openID,
-    "os": "iOS",
+    "os": $.iOS ? "iOS" : "android",
     "operatepath": "adDetail",
     "taskId": taskId,
     "billingtype": 2,
@@ -385,7 +539,7 @@ function doTask(taskId, taskName, action) {
 
 function getOpenId() {
   return new Promise(resolve => {
-    $.post(taskGetUrl("jkd/task/userSign.action", "channel=iO"), async (err, resp, data) => {
+    $.post(taskGetUrl("jkd/task/userSign.action", `channel=${$.iOS?"iOS":"android"}`), async (err, resp, data) => {
       try {
         if (err) {
           $.log(`${JSON.stringify(err)}`)
@@ -396,7 +550,7 @@ function getOpenId() {
           if ($.openId) {
             $.log(`获取openId成功`)
           }
-          $.isSign = data.match(/var issign = parseInt\("(.*)"\)/)[1]
+          // $.isSign = data.match(/var issign = parseInt\("(.*)"\)/)[1]
           $.videoPacketNum = data.match(/var videoPacketNum = (\S*);/)[1]
           $.newsTaskNum = data.match(/var newsTaskNum = (\S*);/)[1]
           $.luckyDrawNum = (data.match(/var luckDrawTaskNum = (\S*);/)[1])
@@ -413,14 +567,14 @@ function getOpenId() {
 function getUserInfo() {
   let body = {
     "openid": $.openId,
-    "channel": "iOS",
-    "os": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
+    "os": $.iOS ? "iOS" : "android",
     "appversioncode": $.version,
     "time": new Date().getTime().toString(),
     "psign": "92dea068b6c271161be05ed358b59932",
     "apptoken": "xzwltoken070704",
     "appid": "xzwl",
-    "appversion": "5.6.5"
+    "appversion": $.version.toString().split('').join('.'),
   }
   return new Promise(resolve => {
     $.post(taskPostUrl("jkd/newMobileMenu/infoMe.action",
@@ -434,8 +588,7 @@ function getUserInfo() {
             data = JSON.parse(data);
             if (data['ret'] === 'ok') {
               $.userName = data.userinfo.username
-              $.sum = data.userinfo.infoMeSumCashItem.title + data.userinfo.infoMeSumCashItem.value
-              // $.current = data.userinfo.infoMeCurCashItem.title + data.userinfo.infoMeCurCashItem.value
+              $.sum = data.userinfo.infoMeSumCashItem.value
               $.gold = data.userinfo.infoMeGoldItem.title + ": " + data.userinfo.infoMeGoldItem.value
               $.current = data.userinfo.infoMeCurCashItem.value
             } else {
@@ -465,7 +618,8 @@ function sign() {
             data = JSON.parse(data);
             if (data['ret'] === 'ok') {
               $.profit += data.datas.signAmt
-              $.log(`签到成功，获得 ${data.datas.signAmt} 金币，已签到 ${data.datas.signDays}天，下次签到金币：${data.datas.nextSignAmt}`)
+              $.log(`签到成功，获得 ${data.datas.signAmt} 金币，已签到 ${data.datas.signDays} 天，下次签到金币：${data.datas.nextSignAmt}`)
+              $.message += `签到成功，获得 ${data.datas.signAmt} 金币，已签到 ${data.datas.signDays} 天，下次签到金币：${data.datas.nextSignAmt}\n`
               $.log(`去做签到分享任务`)
               await signShare(data.datas.position)
             } else {
@@ -519,15 +673,15 @@ function getTaskBoxProfit(boxType = 1) {
 function signShare(position) {
   let body = {
     "openid": $.openId,
-    "channel": "iOS",
-    "os": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
+    "os": $.iOS ? "iOS" : "android",
     "appversioncode": `${$.version}`,
     "time": `${new Date().getTime()}`,
     "psign": "92dea068b6c271161be05ed358b59932",
     "position": position,
     "apptoken": "xzwltoken070704",
     "appid": "xzwl",
-    "appversion": "5.6.5"
+    "appversion": $.version.toString().split('').join('.'),
   }
   return new Promise(resolve => {
     $.post(taskPostUrl("jkd/account/signShareAccount.action",
@@ -565,15 +719,15 @@ function signShare(position) {
 function adv(position) {
   let body = {
     "openid": $.openId,
-    "channel": "iOS",
-    "os": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
+    "os": $.iOS ? "iOS" : "android",
     "appversioncode": `${$.version}`,
     "time": `${new Date().getTime()}`,
     "psign": "92dea068b6c271161be05ed358b59932",
     "position": position,
     "apptoken": "xzwltoken070704",
     "appid": "xzwl",
-    "appversion": "5.6.5"
+    "appversion": $.version.toString().split('').join('.'),
   }
   return new Promise(resolve => {
     $.post(taskPostUrl("jkd/newmobile/stimulateAdv.action",
@@ -618,7 +772,7 @@ function rewardAdv(body) {
           if (safeGet(data)) {
             data = JSON.parse(data);
             if (data['ret'] === 'ok') {
-              $.log(`观看视频成功，获得${data.profit}金币`)
+              $.log(`观看视频成功，获得 ${data.profit} 金币`)
               $.profit += data.profit
             } else if (data['ret'] === 'fail') {
               $.log(`观看视频失败，错误信息：${data.rtn_msg}`)
@@ -642,15 +796,15 @@ function getArticleList(categoryId = 3) {
     "connectionType": 100,
     "optaction": "down",
     "pagesize": 12,
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
-    "appversioncode": "565",
+    "appversioncode": $.version,
     "time": "1609437200",
     "apptoken": "xzwltoken070704",
     "cateid": categoryId,
     "openid": $.openId,
-    "os": "iOS",
-    "appversion": "5.6.5",
+    "os": $.iOS ? "iOS" : "android",
+    "appversion": $.version.toString().split('').join('.'),
     "operatorType": 2,
     "page": 12
   }
@@ -682,14 +836,14 @@ function getArticleList(categoryId = 3) {
 function openTimeBox() {
   let body = {
     "openid": $.openId,
-    "channel": "iOS",
-    "os": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
+    "os": $.iOS ? "iOS" : "android",
     "appversioncode": `${$.version}`,
     "time": `${new Date().getTime()}`,
     "psign": "92dea068b6c271161be05ed358b59932",
     "apptoken": "xzwltoken070704",
     "appid": "xzwl",
-    "appversion": "5.6.5"
+    "appversion": $.version.toString().split('').join('.'),
   }
   return new Promise(resolve => {
     $.post(taskPostUrl("jkd/account/openTimeBoxAccount.action",
@@ -728,10 +882,10 @@ function getArticle(artId) {
   let body = {
     "time": `${new Date().getTime()}`,
     "apptoken": "xzwltoken070704",
-    "appversion": "5.6.5",
+    "appversion": $.version.toString().split('').join('.'),
     "openid": $.openId,
-    "channel": "iOS",
-    "os": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
+    "os": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
     "artid": artId,
     "appid": "xzwl"
@@ -763,16 +917,16 @@ function getArticle(artId) {
 function getVideo(artId) {
   let body = {
     "appid": "xzwl",
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
     "appversioncode": $.version.toString(),
     "time": new Date().getTime().toString(),
     "apptoken": "xzwltoken070704",
     "requestid": new Date().getTime().toString(),
     "openid": $.openId,
-    "os": "iOS",
+    "os": $.iOS ? "iOS" : "android",
     "artid": artId,
-    "appversion": "5.6.5",
+    "appversion": $.version.toString().split('').join('.'),
     "relate": "1",
     "scenetype": ""
   }
@@ -830,28 +984,28 @@ function getStageReward(stage) {
   })
 }
 
-function call2(uuid) {
+function call2(uuid, opttype="ART_READ") {
   let body = {
     "openID": $.openId,
     "openid": $.openId,
     "app_id": "xzwl",
     "version_token": `${$.version}`,
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "vercode": `${$.version}`,
     "psign": "92dea068b6c271161be05ed358b59932",
     "app_token": "xzwltoken070704",
-    "version": "5.6.5",
+    "version": $.version.toString().split('').join('.'),
     "pars": {
       "openID": $.openId,
       "uniqueid": uuid,
-      "os": "iOS",
-      "channel": "iOS",
+      "os": $.iOS ? "iOS" : "android",
+      "channel": $.iOS ? "iOS" : "android",
       "openid": $.openId
     }
   }
   return new Promise(resolve => {
     $.post(taskPostUrl("jkd/minfo/call.action",
-      `jdata=${escape(JSON.stringify(body))}&opttype=ART_READ`),
+      `jdata=${escape(JSON.stringify(body))}&opttype=${opttype}&optversion=1.0`),
       async (err, resp, data) => {
         try {
           if (err) {
@@ -861,9 +1015,15 @@ function call2(uuid) {
             if (safeGet(data)) {
               data = JSON.parse(data);
               if (data['ret'] === 'ok') {
-                $.artcount = data.datas.artcount
-                $.videocount = data.datas.videocount
-                $.log(`文章剩余观看次数：${$.artcount}，视频剩余观看次数：${$.videocount}`)
+                if(opttype==='ART_READ') {
+                  $.artcount = data.datas.artcount
+                  $.videocount = data.datas.videocount
+                  $.log(`文章剩余观看次数：${$.artcount}，视频剩余观看次数：${$.videocount}`)
+                }else{
+                  console.log(`动作${opttype}记录成功！`)
+                }
+              }else{
+                console.log(data)
               }
             }
           }
@@ -875,30 +1035,80 @@ function call2(uuid) {
       })
   })
 }
-
-function call1(uuid, article_id) {
+function call3(uuid, opttype="ART_READ") {
   let body = {
     "openID": $.openId,
     "openid": $.openId,
     "app_id": "xzwl",
     "version_token": `${$.version}`,
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "vercode": `${$.version}`,
     "psign": "92dea068b6c271161be05ed358b59932",
     "app_token": "xzwltoken070704",
-    "version": "5.6.5",
+    "version": $.version.toString().split('').join('.'),
     "pars": {
       "openID": $.openId,
       "uniqueid": uuid,
-      "os": "iOS",
-      "channel": "iOS",
-      "openid": $.openId,
-      "article_id": article_id
+      "os": $.iOS ? "iOS" : "android",
+      "channel": $.iOS ? "iOS" : "android",
+      "openid": $.openId
     }
   }
   return new Promise(resolve => {
+    $.post(taskPostUrl("jkd/minfo/call2.action",
+      `jdata=${escape(JSON.stringify(body))}&opttype=${opttype}&optversion=1.0`),
+      async (err, resp, data) => {
+        try {
+          if (err) {
+            $.log(`${JSON.stringify(err)}`)
+            $.log(`${$.name} API请求失败，请检查网路重试`)
+          } else {
+            if (safeGet(data)) {
+              data = JSON.parse(data);
+              if (data['ret'] === 'ok') {
+                if(opttype==='ART_READ') {
+                  $.artcount = data.datas.artcount
+                  $.videocount = data.datas.videocount
+                  $.log(`文章剩余观看次数：${$.artcount}，视频剩余观看次数：${$.videocount}`)
+                }else{
+                  console.log(`动作${opttype}记录成功！`)
+                }
+              }else{
+                console.log(data)
+              }
+            }
+          }
+        } catch (e) {
+          $.logErr(e, resp)
+        } finally {
+          resolve(data);
+        }
+      })
+  })
+}
+function call1(uuid, article_id, opttype="INF_ART_COMMENTS") {
+  let body = {
+    "openID": $.openId,
+    "openid": $.openId,
+    "app_id": "xzwl",
+    "version_token": `${$.version}`,
+    "channel": $.iOS ? "iOS" : "android",
+    "vercode": `${$.version}`,
+    "psign": "92dea068b6c271161be05ed358b59932",
+    "app_token": "xzwltoken070704",
+    "version": $.version.toString().split('').join('.'),
+    "pars": {
+      "openID": $.openId,
+      "uniqueid": uuid,
+      "os": $.iOS ? "iOS" : "android",
+      "channel": $.iOS ? "iOS" : "android",
+      "openid": $.openId
+    }
+  }
+  if(article_id) body['pars']['article_id'] = article_id
+  return new Promise(resolve => {
     $.post(taskPostUrl("jkd/minfo/call.action",
-      `jdata=${escape(JSON.stringify(body))}&opttype=INF_ART_COMMENTS`),
+      `jdata=${escape(JSON.stringify(body))}&opttype=${opttype}`),
       async (err, resp, data) => {
         try {
           if (err) {
@@ -920,13 +1130,15 @@ function call1(uuid, article_id) {
 }
 
 function article(artId) {
-  let body = `articleid=${artId}&openID=${$.openId}&ce=iOS&request_id=${new Date().getTime()}&scene_type=art_recommend_iOS&articlevideo=0&version=5.6.5&account_type=1&channel=iOS&shade=1&a=zv8lS5d9LnyV7Bdoyt0NHQ==&font_size=1&scene_type=&request_id=${new Date().getTime()}`
+  let body = `articleid=${artId}&openID=${$.openId}&ce=${$.iOS?"iOS":"android"}&request_id=${new Date().getTime()}&scene_type=art_recommend_${$.iOS?"iOS":"android"}&articlevideo=0&version=${$.version}&account_type=1&channel=iOS&shade=1&a=zv8lS5d9LnyV7Bdoyt0NHQ==&font_size=1&scene_type=&request_id=${new Date().getTime()}`
   let config = {
     'url': 'https://www.jukandiannews.com/jkd/weixin20/station/stationarticle.action?' + body,
     'Host': 'www.jukandiannews.com',
     'origin': 'https://www.jukandiannews.com',
     'accept-language': 'zh-cn',
-    'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+    'user-agent': $.isNode() ?
+      (process.env.JKD_USER_AGENT ? process.env.JKD_USER_AGENT : UA) : ($.getdata('JKDUA')
+        ? $.getdata('JKDUA') : UA),
     'Cookie': cookie,
   }
   return new Promise(resolve => {
@@ -1005,14 +1217,14 @@ function readAccount(artId, payType = 1) {
     "read_weal": 0,
     "paytype": payType,
     "securitykey": "",
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
     "appversioncode": `${$.version}`,
     "time": `${new Date().getTime()}`,
     "apptoken": "xzwltoken070704",
-    "appversion": "5.6.5",
+    "appversion": $.version.toString().split('').join('.'),
     "openid": $.openId,
-    "os": "iOS",
+    "os": $.iOS ? "iOS" : "android",
     "artid": artId,
     "accountType": "0",
     "readmodel": "1"
@@ -1053,14 +1265,14 @@ function videoAccount(artId) {
     "read_weal": 0,
     "paytype": 2,
     "securitykey": "",
-    "channel": "iOS",
+    "channel": $.iOS ? "iOS" : "android",
     "psign": "92dea068b6c271161be05ed358b59932",
     "appversioncode": $.version,
     "time": new Date().toString(),
     "apptoken": "xzwltoken070704",
-    "appversion": "5.6.5",
+    "appversion": $.version.toString().split('').join('.'),
     "openid": $.openId,
-    "os": "iOS",
+    "os": $.iOS ? "iOS" : "android",
     "artid": artId,
     "accountType": "0",
     "readmodel": "1"
@@ -1226,6 +1438,7 @@ function getLuckyDrawBox(i) {
       })
   })
 }
+
 function withDraw() {
   return new Promise(resolve => {
     $.post(taskPostUrl("jkd/weixin20/userWithdraw/userWithdrawPost.action",
