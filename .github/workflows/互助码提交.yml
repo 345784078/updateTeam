@@ -6,7 +6,7 @@ name: 互助码提交
 on:
   workflow_dispatch:
   schedule:
-   - cron: '2 19 9,19,30,31 * *'
+   - cron: '32 19 9,19,30,31 * *'
   watch:
     types: started
   repository_dispatch:
