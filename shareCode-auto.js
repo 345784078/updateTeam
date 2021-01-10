@@ -8,20 +8,6 @@
 const $ = new Env("互助码");
 const shareCodes = [
     {
-        zd: $.getdata("zd_shareCode1") || "tvyozifh5adozk2rwtfzezfcoa",
-        nc: $.getdata("nc_shareCode1") || "c7fc067839e444d49074aefe62cfcbeb",
-        mc: $.getdata("mc_shareCode1") || "MTAxODc2NTEzMjAwMDAwMDAwOTU1NzkyMw==",
-        ddgc: $.getdata("dd_shareCode1") || "T008-rosF0tHCjVWnYaS5kRrbA",
-        jxgc: $.getdata("jx_shareCode1") || "Nw7tHtG2yLEwLu8630y9WA==",
-    },
-    {
-        zd: $.getdata("zd_shareCode2") || "u74ulwsyiyvra46m74o7asq5nu",
-        nc: $.getdata("nc_shareCode2") || "dbdde7a321df4602b60d844d7788de62",
-        mc: $.getdata("mc_shareCode2") || "MTAxODc2NTE0NzAwMDAwMDAwODkzMjYxNQ==",
-        ddgc: $.getdata("dd_shareCode2") || "T0104qQuGR0f9gCjVWnYaS5kRrbA",
-        jxgc: $.getdata("jx_shareCode2") || "VN9kvLIcPTGYblnz99c2DQ==",
-    },
-    {
         zd: $.getdata("zd_shareCode3") || "5vvfebbddjz72b3eqwkce3lcem",
         nc: $.getdata("nc_shareCode3") || "5171b942a4ca4715864f9ad2a6b29c6a",
         mc: $.getdata("mc_shareCode3") || "MTAxODc2NTEzMDAwMDAwMDAwNzk1MTA4Mw==",
